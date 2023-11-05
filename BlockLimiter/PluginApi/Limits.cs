@@ -20,7 +20,7 @@ namespace BlockLimiter.PluginApi
                 if (Grid.CanSpawn(grid, id)) continue;
                 return true;
             }
-            
+
             return false;
 
         }

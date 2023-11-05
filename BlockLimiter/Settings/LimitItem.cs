@@ -20,7 +20,6 @@ namespace BlockLimiter.Settings
 
     public class LimitItem : ViewModel
     {
-
         private bool _limitFaction;
         private bool _limitGrids;
         private bool _limitPlayer;
@@ -37,7 +36,6 @@ namespace BlockLimiter.Settings
         private FilterOperator _limitOperator;
         private string _filterValue;
 
-
         public LimitItem()
         {
             CollectionChanged += OnCollectionChanged;
@@ -46,23 +44,21 @@ namespace BlockLimiter.Settings
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged();
-            if (MyAPIGateway.Session != null)Reset();
+            if (MyAPIGateway.Session != null) Reset();
             Save();
         }
 
-
         [XmlIgnore]
         [Display(Visible = false)]
-        public ConcurrentDictionary<long,int> FoundEntities { get; } = new ConcurrentDictionary<long, int>();
+        public ConcurrentDictionary<long, int> FoundEntities { get; } = new ConcurrentDictionary<long, int>();
 
-
-        [Display(GroupName =  "Description", Order = 1, Name = "Name", Description = "Name of the limit. This helps with some of the commands")]
+        [Display(GroupName = "Description", Order = 1, Name = "Name", Description = "Name of the limit. This helps with some of the commands")]
         public string Name
         {
             get => _name;
             set
             {
-                _name = string.IsNullOrEmpty(value) ? _blockList.FirstOrDefault():value;
+                _name = string.IsNullOrEmpty(value) ? _blockList.FirstOrDefault() : value;
                 OnPropertyChanged();
             }
         }
@@ -73,25 +69,25 @@ namespace BlockLimiter.Settings
             get => _blockList;
             set
             {
-                _blockList =value;
+                _blockList = value;
                 OnPropertyChanged();
             }
         }
-        
+
         [Display(GroupName = "Description", Order = 3, Name = "SearchType", Description = "Decides how blocks are matched")]
         public BlockListSearchType SearchType
         {
             get => _searchType;
             set
             {
-                _searchType =value;
+                _searchType = value;
                 OnPropertyChanged();
             }
         }
-        
-        
 
-        [Display(GroupName = "Description", Order =  4,Name = "Limit", Description = "Limit value")]
+
+
+        [Display(GroupName = "Description", Order = 4, Name = "Limit", Description = "Limit value")]
         public int Limit
         {
             get => _limit;
@@ -102,7 +98,7 @@ namespace BlockLimiter.Settings
             }
         }
 
-        [Display(GroupName = "Description",Order = 5, Name = "Exceptions", Description = "List of player or grid exception. You can also use entityId.")]
+        [Display(GroupName = "Description", Order = 5, Name = "Exceptions", Description = "List of player or grid exception. You can also use entityId.")]
         public List<string> Exceptions
         {
             get => _exceptions;
@@ -128,7 +124,7 @@ namespace BlockLimiter.Settings
             }
         }
 
-        [Display(Name = "GridType Limit", GroupName = "Options", Order =  4,
+        [Display(Name = "GridType Limit", GroupName = "Options", Order = 4,
             Description = "This is choose which grid type to block placement")]
         public GridType GridTypeBlock
         {
@@ -161,7 +157,7 @@ namespace BlockLimiter.Settings
             }
         }
         #endregion
-       
+
         #region Restrictions
 
         [Display(Name = "PunishmentType", Order = 3, GroupName = "Restrictions", Description = "Set's what to do to extra blocks in violation of the limit")]
@@ -186,9 +182,7 @@ namespace BlockLimiter.Settings
                 OnPropertyChanged();
             }
         }
-        
-        
-        
+
         [Display(Name = "Restrict Projection", GroupName = "Restrictions", Order = 2,
             Description = "Removes block from projection once limit reached.")]
         public bool RestrictProjection
@@ -297,11 +291,10 @@ namespace BlockLimiter.Settings
                         faction = MySession.Static.Factions.GetPlayerFaction(id);
                         displayName = identity.DisplayName;
                         playerSteamId = Utilities.GetSteamIdFromPlayerId(id);
-
                     }
                     else
                     {
-                        faction = (MyFaction) MySession.Static.Factions.TryGetFactionById(id);
+                        faction = (MyFaction)MySession.Static.Factions.TryGetFactionById(id);
                     }
 
                     break;
@@ -324,15 +317,15 @@ namespace BlockLimiter.Settings
                     playerSteamId = Utilities.GetSteamIdFromPlayerId(playerIdentity.IdentityId);
                     break;
                 case MyCubeGrid grid:
-                {
-                    if (allExceptions.Contains(grid.DisplayName) || allExceptions.Contains(grid.EntityId.ToString()))
-                        return true;
-                    var owners = new HashSet<long>(GridCache.GetOwners(grid));
-                    owners.UnionWith(GridCache.GetBuilders(grid));
-                    if (owners.Count == 0) break;
-                    gridOwners.UnionWith(owners);
-                    break;
-                }
+                    {
+                        if (allExceptions.Contains(grid.DisplayName) || allExceptions.Contains(grid.EntityId.ToString()))
+                            return true;
+                        var owners = new HashSet<long>(GridCache.GetOwners(grid));
+                        owners.UnionWith(GridCache.GetBuilders(grid));
+                        if (owners.Count == 0) break;
+                        gridOwners.UnionWith(owners);
+                        break;
+                    }
             }
 
             foreach (var owner in gridOwners)
@@ -354,7 +347,7 @@ namespace BlockLimiter.Settings
             if (playerSteamId > 0 && allExceptions.Contains(playerSteamId.ToString())) return true;
             if (identityId > 0 && allExceptions.Contains(identityId.ToString())) return true;
             if (identity != null && allExceptions.Contains(identity.DisplayName)) return true;
-            if (faction != null && (allExceptions.Contains(faction.Tag)|| allExceptions.Contains(faction.FactionId.ToString()))) return true;
+            if (faction != null && (allExceptions.Contains(faction.Tag) || allExceptions.Contains(faction.FactionId.ToString()))) return true;
             return !string.IsNullOrEmpty(displayName) && allExceptions.Contains(displayName);
         }
 
@@ -367,7 +360,7 @@ namespace BlockLimiter.Settings
         {
             if (_blockList.Count == 0 || definition == null) return false;
 
-            
+
             if (GridTypeBlock != GridType.AllGrids)
             {
                 switch (definition.CubeSize)
@@ -487,7 +480,7 @@ namespace BlockLimiter.Settings
 
             return false;
         }
-        
+
         internal bool IsFilterType(MyObjectBuilder_CubeGrid grid, long playerId = 0)
         {
             if (LimitFilterType == FilterType.None) return true;
@@ -509,7 +502,7 @@ namespace BlockLimiter.Settings
                         : grid.CubeBlocks.Count < gbCount;
                 case FilterType.FactionMemberCount:
                     if (!int.TryParse(_filterValue, out var fmCount)) return false;
-                    if (playerId == 0)break;
+                    if (playerId == 0) break;
                     var ownerFaction = MySession.Static.Factions.GetPlayerFaction(playerId);
                     if (ownerFaction == null) break;
                     return LimitFilterOperator == FilterOperator.GreaterThan
@@ -517,7 +510,7 @@ namespace BlockLimiter.Settings
                         : ownerFaction.Members.Count < fmCount;
                 case FilterType.EssentialRank:
                     if (!EssentialsPlayerAccount.EssentialsInstalled) return false;
-                    if ( playerId == 0) break;
+                    if (playerId == 0) break;
                     var pSteamId = Utilities.GetSteamIdFromPlayerId(playerId);
                     var permList = new List<string>(EssentialsPlayerAccount.GetInheritPermList(pSteamId));
                     if (permList.Count == 0) break;
@@ -532,14 +525,14 @@ namespace BlockLimiter.Settings
                     }
 
                     return result;
-                    
+
                 default:
                     return false;
             }
 
             return false;
         }
-        
+
         internal bool IsGridType(MyCubeGrid grid)
         {
             bool isGridType = false;
@@ -551,7 +544,7 @@ namespace BlockLimiter.Settings
                     isGridType = grid.GridSizeEnum == MyCubeSize.Small;
                     break;
                 case GridType.LargeGridsOnly:
-                    isGridType =  grid.GridSizeEnum == MyCubeSize.Large && !grid.IsStatic;
+                    isGridType = grid.GridSizeEnum == MyCubeSize.Large && !grid.IsStatic;
                     break;
                 case GridType.LargeGridsAndStations:
                     isGridType = grid.GridSizeEnum == MyCubeSize.Large;
@@ -577,7 +570,7 @@ namespace BlockLimiter.Settings
         internal bool IsGridType(MyObjectBuilder_CubeGrid grid, long playerId = 0)
         {
             bool isGridType = false;
-            var isFilterType = IsFilterType(grid,playerId);
+            var isFilterType = IsFilterType(grid, playerId);
 
             switch (GridTypeBlock)
             {
@@ -610,28 +603,26 @@ namespace BlockLimiter.Settings
             if (foundEntities == null || foundEntities.Count == 0) return;
             foreach (var entity in foundEntities)
             {
-             if (entity.Value ==0) FoundEntities.Remove(entity.Key);
+                if (entity.Value == 0) FoundEntities.Remove(entity.Key);
             }
         }
-        
+
         internal void Reset()
         {
             FoundEntities.Clear();
         }
-        
+
         public override string ToString()
         {
             var useName = string.IsNullOrEmpty(Name) ? BlockList.FirstOrDefault() : Name;
             return $"{useName} - [{BlockList.Count} : {Limit}]";
         }
-        
+
         private void Save()
         {
             Reset();
             BlockLimiterConfig.Instance.Save();
         }
-
-
         #endregion
 
         #region Enum
@@ -679,8 +670,6 @@ namespace BlockLimiter.Settings
             ShipsOnly,
             SupportedStationsOnly
         }
-
-
         #endregion
     }
 }

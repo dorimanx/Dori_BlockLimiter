@@ -17,7 +17,7 @@ using VRage.Game.ModAPI;
 namespace BlockLimiter.Commands
 {
     [Category("blocklimit")]
-    public partial class Player:CommandModule
+    public partial class Player : CommandModule
     {
         private static readonly Dictionary<ulong, DateTime> _updateCommandTimeout = new Dictionary<ulong, DateTime>();
 
@@ -32,7 +32,6 @@ namespace BlockLimiter.Commands
             }
 
             var steamId = Context.Player.SteamUserId;
-
             var playerFaction = MySession.Static.Factions.GetPlayerFaction(Context.Player.IdentityId);
 
             if (!_updateCommandTimeout.TryGetValue(steamId, out var lastRun))
@@ -50,7 +49,6 @@ namespace BlockLimiter.Commands
                 };
                 Context.Respond("Limits Updated");
                 return;
-
             }
 
             var diff = DateTime.Now - lastRun;
@@ -62,7 +60,7 @@ namespace BlockLimiter.Commands
             }
 
             _updateCommandTimeout[steamId] = DateTime.Now;
-            
+
             if (playerFaction != null && !Utility.UpdateLimits.FactionLimit(playerFaction.FactionId))
             {
                 Context.Respond("Faction limit not updated");
@@ -74,10 +72,8 @@ namespace BlockLimiter.Commands
                 return;
             }
             Context.Respond("Limits Updated");
-
-
-
         }
+
         [Command("mylimit", "list current player status")]
         [Permission(MyPromoteLevel.None)]
         public void MyLimit()
@@ -94,7 +90,6 @@ namespace BlockLimiter.Commands
             }
 
             var playerId = Context.Player.IdentityId;
-
             var newList = BlockLimiterConfig.Instance.AllLimits;
 
             if (!newList.Any())
@@ -102,24 +97,21 @@ namespace BlockLimiter.Commands
                 Context.Respond("No limit item found");
                 return;
             }
-            
 
             var sb = Utilities.GetLimit(playerId);
-
             if (sb.Length == 0)
             {
                 Context.Respond("You have no block within set limit");
                 return;
             }
-            
-            if (Utilities.TryGetAimedBlock(Context.Player, out var panel))
+
+            if (Utilities.TryGetAimedBlock((MyPlayer)Context.Player, out var panel))
             {
-                ((IMyTextSurface) panel).WriteText(sb);
+                ((IMyTextSurface)panel).WriteText(sb);
                 return;
             }
 
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"PlayerLimit",sb.ToString()),Context.Player.SteamUserId);
-
+            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "PlayerLimit", sb.ToString()), Context.Player.SteamUserId);
         }
 
         [Command("limits", "gets list of limits and there settings")]
@@ -138,27 +130,27 @@ namespace BlockLimiter.Commands
             {
                 sb.AppendLine($"Ship Size Limit = {BlockLimiterConfig.Instance.MaxBlockSizeShips} Blocks");
             }
-            
+
             if (BlockLimiterConfig.Instance.MaxBlockSizeStations > 0)
             {
                 sb.AppendLine($"Station Size Limit = {BlockLimiterConfig.Instance.MaxBlockSizeStations} blocks");
             }
-            
+
             if (BlockLimiterConfig.Instance.MaxBlocksLargeGrid > 0)
             {
                 sb.AppendLine($"Large Grid Size Limit = {BlockLimiterConfig.Instance.MaxBlocksLargeGrid} blocks");
             }
-            
+
             if (BlockLimiterConfig.Instance.MaxBlocksSmallGrid > 0)
             {
                 sb.AppendLine($"Small Grid Size Limits = {BlockLimiterConfig.Instance.MaxBlocksSmallGrid} blocks");
             }
-            
+
             if (BlockLimiterConfig.Instance.MaxSmallGrids > 0)
             {
                 sb.AppendLine($"Small Grids Limit = {BlockLimiterConfig.Instance.MaxSmallGrids} small grids per player");
             }
-            
+
             if (BlockLimiterConfig.Instance.MaxLargeGrids > 0)
             {
                 sb.AppendLine($"Large Grids Limit = {BlockLimiterConfig.Instance.MaxLargeGrids} large grids per player");
@@ -176,19 +168,19 @@ namespace BlockLimiter.Commands
                         return;
                     }
 
-                    ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of Limits",sb.ToString()),Context.Player.SteamUserId);
+                    ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "List of Limits", sb.ToString()), Context.Player.SteamUserId);
                 }
                 return;
             }
 
-            sb.AppendLine($"Found {limiterLimits.Count(x=>x.BlockList.Any())} items");
+            sb.AppendLine($"Found {limiterLimits.Count(x => x.BlockList.Any())} items");
             foreach (var item in limiterLimits)
             {
                 if (item.BlockList.Count == 0) continue;
                 var name = string.IsNullOrEmpty(item.Name) ? "No Name" : item.Name;
                 sb.AppendLine();
                 sb.AppendLine(name);
-                item.BlockList.ForEach(x=>sb.Append($"[{x}] "));
+                item.BlockList.ForEach(x => sb.Append($"[{x}] "));
                 sb.AppendLine();
                 sb.AppendLine($"GridType: {item.GridTypeBlock}");
                 if (item.LimitFilterType > LimitItem.FilterType.None)
@@ -206,25 +198,21 @@ namespace BlockLimiter.Commands
                 Context.Respond(sb.ToString());
                 return;
             }
-            
-            if (Utilities.TryGetAimedBlock(Context.Player, out var panel))
+
+            if (Utilities.TryGetAimedBlock((MyPlayer)Context.Player, out var panel))
             {
-                ((IMyTextSurface) panel).WriteText(sb);
+                ((IMyTextSurface)panel).WriteText(sb);
                 return;
             }
 
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of Limits",sb.ToString()),Context.Player.SteamUserId);
+            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "List of Limits", sb.ToString()), Context.Player.SteamUserId);
         }
 
-
-        
         [Command("pairnames", "gets the list of all pair names possible")]
         [Permission(MyPromoteLevel.None)]
         public void ListPairNames()
         {
-
             var sb = new StringBuilder();
-
             var allDef = MyDefinitionManager.Static.GetAllDefinitions();
 
             var def = new List<MyDefinitionBase>(allDef.Where(x => x is MyCubeBlockDefinition));
@@ -237,7 +225,7 @@ namespace BlockLimiter.Commands
                 /*
                 foreach (var defBase in allDef)
                 {
-                    if (!defBase.Id.TypeId.ToString().Substring(16).Equals(blockType,StringComparison.OrdinalIgnoreCase))
+                    if (!defBase.Id.TypeId.ToString().Substring(16).Equals(blockType, StringComparison.OrdinalIgnoreCase))
                         continue;
                     def.Add(defBase);
                 }
@@ -247,7 +235,6 @@ namespace BlockLimiter.Commands
                     Context.Respond($"Can't find any definition for {blockType}");
                     return;
                 }
-
             }
 
 
@@ -263,10 +250,10 @@ namespace BlockLimiter.Commands
             {
                 if (!MyDefinitionManager.Static.TryGetCubeBlockDefinition(myDefinitionId.Id, out var x)) continue;
                 if (myDefinitionId.Context == null) continue;
-                
+
                 if (!definitionDictionary.ContainsKey(myDefinitionId.Context))
                 {
-                    definitionDictionary[myDefinitionId.Context] = new List<string> {x.BlockPairName};
+                    definitionDictionary[myDefinitionId.Context] = new List<string> { x.BlockPairName };
                     continue;
                 }
 
@@ -277,8 +264,8 @@ namespace BlockLimiter.Commands
             foreach (var (context, thisList) in definitionDictionary.OrderBy(x => x.Key.ModName))
             {
                 sb.AppendLine(context.IsBaseGame ? $"[{thisList.Count} Vanilla blocks]" : $"[{thisList.Count} blocks --- {context.ModName} - {context.ModId}]");
-                
-                thisList.OrderBy(x=>x).ForEach(x=>sb.AppendLine(x));
+
+                thisList.OrderBy(x => x).ForEach(x => sb.AppendLine(x));
                 sb.AppendLine();
             }
 
@@ -288,24 +275,20 @@ namespace BlockLimiter.Commands
                 return;
             }
 
-            
-            if (Utilities.TryGetAimedBlock(Context.Player, out var panel))
+            if (Utilities.TryGetAimedBlock((MyPlayer)Context.Player, out var panel))
             {
-                ((IMyTextSurface) panel).WriteText(sb);
+                ((IMyTextSurface)panel).WriteText(sb);
                 return;
             }
 
-
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of pair names",sb.ToString()),Context.Player.SteamUserId);
+            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "List of pair names", sb.ToString()), Context.Player.SteamUserId);
         }
 
         [Command("definitions", "gets the list of all blocks definitions currently in game")]
         [Permission(MyPromoteLevel.None)]
         public void ListBlockDefinitions()
         {
-
             var sb = new StringBuilder();
-
             var allDef = MyDefinitionManager.Static.GetAllDefinitions();
 
             var def = new List<MyDefinitionBase>(allDef.Where(x => x is MyCubeBlockDefinition).OrderBy(x => x.Id.ToString()));
@@ -317,7 +300,7 @@ namespace BlockLimiter.Commands
                 /*
                 foreach (var defBase in allDef)
                 {
-                    if (!defBase.Id.TypeId.ToString().Substring(16).Equals(blockType,StringComparison.OrdinalIgnoreCase))
+                    if (!defBase.Id.TypeId.ToString().Substring(16).Equals(blockType, StringComparison.OrdinalIgnoreCase))
                         continue;
                     def.Add(defBase);
                 }
@@ -327,7 +310,6 @@ namespace BlockLimiter.Commands
                     Context.Respond($"Can't find any definition for {blockType}");
                     return;
                 }
-
             }
 
             if (def.Count == 0)
@@ -341,11 +323,11 @@ namespace BlockLimiter.Commands
 
             foreach (var myDefinitionId in def)
             {
-               
+
                 if (myDefinitionId.Context == null) continue;
                 if (!definitionDictionary.ContainsKey(myDefinitionId.Context))
                 {
-                    definitionDictionary[myDefinitionId.Context] = new List<string> {myDefinitionId.Id.ToString().Substring(16)};
+                    definitionDictionary[myDefinitionId.Context] = new List<string> { myDefinitionId.Id.ToString().Substring(16) };
                     continue;
                 }
 
@@ -353,11 +335,11 @@ namespace BlockLimiter.Commands
                 definitionDictionary[myDefinitionId.Context].Add(myDefinitionId.Id.ToString().Substring(16));
             }
 
-            foreach (var (context,thisList) in definitionDictionary.OrderBy(x=>x.Key.ModName))
+            foreach (var (context, thisList) in definitionDictionary.OrderBy(x => x.Key.ModName))
             {
                 sb.AppendLine(context.IsBaseGame ? $"[{thisList.Count} Vanilla blocks]" : $"[{thisList.Count} blocks --- {context.ModName} - {context.ModId}]");
-                
-                thisList.ForEach(x=>sb.AppendLine(x));
+
+                thisList.ForEach(x => sb.AppendLine(x));
                 sb.AppendLine();
             }
 
@@ -367,17 +349,14 @@ namespace BlockLimiter.Commands
                 return;
             }
 
-            if (Utilities.TryGetAimedBlock(Context.Player, out var panel))
+            if (Utilities.TryGetAimedBlock((MyPlayer)Context.Player, out var panel))
             {
-                ((IMyTextSurface) panel).WriteText(sb);
+                ((IMyTextSurface)panel).WriteText(sb);
                 return;
             }
 
-            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName,"List of block definitions",sb.ToString()),Context.Player.SteamUserId);
+            ModCommunication.SendMessageTo(new DialogMessage(BlockLimiterConfig.Instance.ServerName, "List of block definitions", sb.ToString()), Context.Player.SteamUserId);
 
         }
-
     }
-
-
 }

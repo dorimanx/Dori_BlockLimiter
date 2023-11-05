@@ -15,7 +15,7 @@ namespace BlockLimiter.Utility
             if (collectionChanged == null) return;
             foreach (var @delegate in collectionChanged.GetInvocationList())
             {
-                var nh = (NotifyCollectionChangedEventHandler) @delegate;
+                var nh = (NotifyCollectionChangedEventHandler)@delegate;
                 var dispObj = nh.Target as DispatcherObject;
                 var dispatcher = dispObj?.Dispatcher;
                 if (dispatcher != null && !dispatcher.CheckAccess())

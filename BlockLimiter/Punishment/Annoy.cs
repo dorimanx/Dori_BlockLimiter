@@ -19,41 +19,34 @@ namespace BlockLimiter.Punishment
         public override int GetUpdateResolution()
         {
             //return 800;
-            return Math.Max(BlockLimiterConfig.Instance.AnnoyInterval,1) * 1000;
+            return Math.Max(BlockLimiterConfig.Instance.AnnoyInterval, 1) * 1000;
         }
 
         public override void Handle()
         {
             //if (BlockLimiterConfig.Instance.AnnoyInterval < 1) return;
-            if (!BlockLimiterConfig.Instance.Annoy || !BlockLimiterConfig.Instance.EnableLimits)return;
+            if (!BlockLimiterConfig.Instance.Annoy || !BlockLimiterConfig.Instance.EnableLimits) return;
 
             RunAnnoyance();
         }
 
         public static void RunAnnoyance()
         {
-            if (!BlockLimiterConfig.Instance.EnableLimits)return;
+            if (!BlockLimiterConfig.Instance.EnableLimits) return;
+
             var limitItems = BlockLimiterConfig.Instance.AllLimits;
 
-
             if (!limitItems.Any())
-            {
                 return;
-            }
-
 
             var onlinePlayers = MySession.Static.Players.GetOnlinePlayers();
-
             if (onlinePlayers.Count < 1) return;
-
 
             foreach (var player in onlinePlayers)
             {
-                var steamId = MySession.Static.Players.TryGetSteamId(player.Identity.IdentityId);
+                var steamId = player.Id.SteamId;
                 var playerGridIds = new HashSet<long>(player.Grids);
-
                 var playerFaction = MySession.Static.Factions.GetPlayerFaction(player.Identity.IdentityId);
-
 
                 bool AnnoyPlayer()
                 {
@@ -62,9 +55,8 @@ namespace BlockLimiter.Punishment
                     {
                         if (item.IsExcepted(player)) continue;
 
-                        foreach (var (id,count) in item.FoundEntities)
+                        foreach (var (id, count) in item.FoundEntities)
                         {
-
                             if (count <= item.Limit) continue;
 
                             if (id == player.Identity.IdentityId)
@@ -78,7 +70,7 @@ namespace BlockLimiter.Punishment
                                 annoy = true;
                                 break;
                             }
-                        
+
                             if (playerFaction == null || id != playerFaction.FactionId) continue;
                             annoy = true;
                             break;
@@ -91,15 +83,13 @@ namespace BlockLimiter.Punishment
                 if (!AnnoyQueue.TryGetValue(steamId, out var time))
                 {
                     if (AnnoyPlayer())
-                    {
                         AnnoyQueue[steamId] = DateTime.Now.AddSeconds(BlockLimiterConfig.Instance.AnnoyInterval);
-                    }
+
                     continue;
                 }
 
                 if (AnnoyPlayer()) continue;
                 AnnoyQueue.Remove(steamId);
-
             }
 
             if (AnnoyQueue.Count == 0) return;
@@ -114,14 +104,13 @@ namespace BlockLimiter.Punishment
 
                     try
                     {
-                        ModCommunication.SendMessageTo(new NotificationMessage($"{BlockLimiterConfig.Instance.AnnoyMessage}",BlockLimiterConfig.Instance.AnnoyDuration,MyFontEnum.White),id);
+                        ModCommunication.SendMessageTo(new NotificationMessage($"{BlockLimiterConfig.Instance.AnnoyMessage}", BlockLimiterConfig.Instance.AnnoyDuration, MyFontEnum.White), id);
+                        BlockLimiter.Instance.Log.Info($"Annoy message sent to {Utilities.GetPlayerNameFromSteamId(id)}");
                     }
                     catch (Exception exception)
                     {
                         Log.Error(exception);
                     }
-                    BlockLimiter.Instance.Log.Info($"Annoy message sent to {Utilities.GetPlayerNameFromSteamId(id)}");
-
                 }
             }
 
@@ -129,12 +118,6 @@ namespace BlockLimiter.Punishment
             {
                 AnnoyQueue[id] = DateTime.Now.AddSeconds(BlockLimiterConfig.Instance.AnnoyInterval);
             }
-
         }
-
-
-
-
-
     }
 }

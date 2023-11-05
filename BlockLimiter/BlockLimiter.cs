@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -15,7 +14,6 @@ using BlockLimiter.Settings;
 using BlockLimiter.Utility;
 using Newtonsoft.Json;
 using NLog;
-using NLog.Fluent;
 using Sandbox.Engine.Multiplayer;
 using Sandbox.Game.Entities;
 using Sandbox.Game.Entities.Cube;
@@ -33,6 +31,7 @@ using VRage.Collections;
 using VRage.Game;
 using VRage.Game.Entity;
 using VRage.Game.ModAPI;
+using Torch.Managers.PatchManager;
 
 namespace BlockLimiter
 {
@@ -66,9 +65,13 @@ namespace BlockLimiter
                 new Punish()
             };
             _processThreads = new List<Thread>();
-            _processThread = new Thread(PluginProcessing);
+            _processThread = new Thread(PluginProcessing)
+            {
+                IsBackground = true,
+                Priority = ThreadPriority.Lowest
+            };
             _processThread.Start();
-            
+
             MyMultiplayer.Static.ClientJoined += StaticOnClientJoined;
             MyCubeGrids.BlockBuilt += MyCubeGridsOnBlockBuilt;
             MySession.Static.Factions.FactionStateChanged += FactionsOnFactionStateChanged;
@@ -106,13 +109,11 @@ namespace BlockLimiter
                 _justAdded.Add(block);
                 Block.IncreaseCount(block.BlockDefinition,
                     block.BuiltBy == block.OwnerId
-                        ? new List<long> {block.BuiltBy}
-                        : new List<long> {block.BuiltBy, block.OwnerId}, 1, grid.EntityId);
+                        ? new List<long> { block.BuiltBy }
+                        : new List<long> { block.BuiltBy, block.OwnerId }, 1, grid.EntityId);
             }
-
-
         }
-        
+
         /// <summary>
         /// Event to refresh player's faction/player limits to account for change
         /// </summary>
@@ -123,8 +124,12 @@ namespace BlockLimiter
         /// <param name="senderId"></param>
         private void FactionsOnFactionStateChanged(MyFactionStateChange factionState, long fromFaction, long toFaction, long playerId, long senderId)
         {
-            if (!BlockLimiterConfig.Instance.EnableLimits || (factionState != MyFactionStateChange.FactionMemberLeave && factionState != MyFactionStateChange.FactionMemberAcceptJoin && factionState != MyFactionStateChange.RemoveFaction
-                ))return;
+            if (!BlockLimiterConfig.Instance.EnableLimits ||
+                    (factionState != MyFactionStateChange.FactionMemberLeave &&
+                    factionState != MyFactionStateChange.FactionMemberAcceptJoin &&
+                    factionState != MyFactionStateChange.RemoveFaction))
+                return;
+
             if (factionState == MyFactionStateChange.RemoveFaction)
             {
                 foreach (var limit in BlockLimiterConfig.Instance.AllLimits)
@@ -132,14 +137,12 @@ namespace BlockLimiter
                     limit.Exceptions.Remove(fromFaction.ToString());
                     limit.FoundEntities.Remove(fromFaction);
                 }
-
                 return;
             }
 
             UpdateLimits.Enqueue(fromFaction);
             UpdateLimits.Enqueue(toFaction);
             UpdateLimits.Enqueue(playerId);
-
         }
 
         /// <summary>
@@ -166,18 +169,16 @@ namespace BlockLimiter
 
             _justAdded.Add(block);
             GridCache.AddBlock(block);
-            
-            Block.IncreaseCount(block.BlockDefinition,new List<long>{block.BuiltBy},1,grid.EntityId);
-            
-        }
 
+            Block.IncreaseCount(block.BlockDefinition, new List<long> { block.BuiltBy }, 1, grid.EntityId);
+        }
 
         private static void StaticOnClientJoined(ulong obj, string playerName)
         {
             if (obj == 0) return;
             if (!BlockLimiterConfig.Instance.EnableLimits) return;
             var identityId = Utilities.GetPlayerIdFromSteamId(obj);
-            if (identityId == 0)return;
+            if (identityId == 0) return;
             //var playerFaction = MySession.Static.Factions.GetPlayerFaction(identityId);
             UpdateLimits.Enqueue(identityId);
             //if (playerFaction != null)UpdateLimits.Enqueue(playerFaction.FactionId);
@@ -200,7 +201,7 @@ namespace BlockLimiter
                         LimitPlayers = false,
                         LimitGrids = false,
                         Limit = item.Value,
-                        BlockList = new List<string>{item.Key}
+                        BlockList = new List<string> { item.Key }
                     }));
 
                     break;
@@ -211,18 +212,15 @@ namespace BlockLimiter
                         LimitPlayers = true,
                         LimitGrids = false,
                         Limit = item.Value,
-                        BlockList = new List<string>{item.Key}
+                        BlockList = new List<string> { item.Key }
                     }));
 
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
             VanillaLimits.UnionWith(limits);
         }
-
-
 
         /// <summary>
         /// Hey Ryo,
@@ -248,32 +246,30 @@ namespace BlockLimiter
                                 }
                                 catch (Exception ex)
                                 {
-                                        Log.Warn("Handler Problems: {0} - {1}", currentHandler.GetUpdateResolution(),
-                                            ex);
+                                        Log.Warn("Handler Problems: {0} - {1}", currentHandler.GetUpdateResolution(), ex);
                                 }
-
                                 currentHandler.LastUpdate = DateTime.Now;
                             }
-
-                            Thread.Sleep(100);
+                            Thread.Sleep(5000);
                         }
-
                     });
+
                     _processThreads.Add(thread);
                     thread.Start();
                 }
 
                 foreach (var thread in _processThreads)
+                {
                     thread.Join();
-
+                }
             }
             catch (ThreadAbortException ex)
             {
-                    Log.Trace(ex);
+                Log.Trace(ex);
             }
             catch (Exception ex)
             {
-                    Log.Error(ex);
+                Log.Error(ex);
             }
         }
 
@@ -284,31 +280,38 @@ namespace BlockLimiter
             PluginManager = Torch.Managers.GetManager<PluginManager>();
             Load();
             _sessionManager = Torch.Managers.GetManager<TorchSessionManager>();
+
             if (_sessionManager != null)
                 _sessionManager.SessionStateChanged += SessionChanged;
-
         }
-
-
 
         public override void Update()
         {
             base.Update();
-            if (MyAPIGateway.Session == null|| !BlockLimiterConfig.Instance.EnableLimits)
+            if (MyAPIGateway.Session == null || !BlockLimiterConfig.Instance.EnableLimits)
                 return;
+
             if (++_updateCounter10 % 10 == 0)
             {
+                _updateCounter10 = 0;
                 GridChange.ClearRemoved();
                 UpdateLimits.Dequeue();
                 Punish.Update();
             }
-            if (++_updateCounter100 % 100 != 0) return;
+
+            if (++_updateCounter100 % 100 != 0)
+                return;
+
+            _updateCounter100 = 0;
+
             MergeBlockPatch.MergeBlockCache?.Clear();
         }
 
-
-        private  void SessionChanged(ITorchSession session, TorchSessionState state)
+        private void SessionChanged(ITorchSession session, TorchSessionState state)
         {
+            var patchManager = Torch.Managers.GetManager<PatchManager>();
+            var context = patchManager.AcquireContext();
+
             _running = state == TorchSessionState.Loaded;
             switch (state)
             {
@@ -337,6 +340,9 @@ namespace BlockLimiter
                             JsonConvert.DeserializeObject<List<PlayerTimeModule.PlayerTimeData>>(data);
                     }
 
+                    if (BlockLimiterConfig.Instance.EnableGridSpawnBlocking)
+                        GridSpawnPatch.Patch(context);
+
                     Torch.CurrentSession.Managers.GetManager<IMultiplayerManagerServer>().PlayerJoined +=
                         PlayerTimeModule.LogTime;
                     DoInit();
@@ -344,7 +350,7 @@ namespace BlockLimiter
                     GetVanillaLimits();
                     if (BlockLimiterConfig.Instance.EnableLimits)
                     {
-                        Activate(); 
+                        Activate();
                     }
                     break;
                 case TorchSessionState.Unloading:
@@ -370,18 +376,18 @@ namespace BlockLimiter
                 {
                     var num = Block.FixIds();
                     if (num > 0) Log.Warn($"Reviewed {num} block ownership");
-
                 }
-                ResetLimits(true,false,false);
+                ResetLimits(true, false, false);
             });
         }
+
         private static void Load()
         {
             BlockLimiterConfig.Instance.Load();
         }
-        
+
         private UserControl _control;
-        private UserControl Control => _control ?? (_control = new PropertyGrid{ DataContext = BlockLimiterConfig.Instance});
+        private UserControl Control => _control ?? (_control = new PropertyGrid { DataContext = BlockLimiterConfig.Instance });
         public UserControl GetControl()
         {
             return Control;
@@ -394,9 +400,7 @@ namespace BlockLimiter
                 Control.IsEnabled = enable;
                 Control.DataContext = BlockLimiterConfig.Instance;
             });
-
         }
-
 
         public override void Dispose()
         {
@@ -404,19 +408,20 @@ namespace BlockLimiter
             try
             {
                 foreach (var thread in _processThreads)
+                {
                     thread.Abort();
+                }
                 _processThread.Abort();
             }
             catch (Exception e)
             {
-                Log.Warn(e.StackTrace,"Session failed to load.  Check world for corruption");
-
+                Log.Warn(e.StackTrace, "Session failed to load.  Check world for corruption");
             }
         }
 
         public static void ResetLimits(bool updateGrids = true, bool updatePlayers = true, bool updateFactions = true)
         {
-            UpdateLimits.ResetLimits(updateGrids,updatePlayers,updateFactions);
+            UpdateLimits.ResetLimits(updateGrids, updatePlayers, updateFactions);
         }
         /*
         public static void ResetLimits(bool updateGrids = true, bool updatePlayers = true, bool updateFactions = true)
@@ -441,8 +446,6 @@ namespace BlockLimiter
                         UpdateLimits.Enqueue(grid.EntityId);
                     });
                 }
-
-
             }
 
             if (updatePlayers)
@@ -466,9 +469,7 @@ namespace BlockLimiter
                             UpdateLimits.Enqueue(identity.IdentityId);
                         });
                     });
-
                 }
-
             }
 
             if (updateFactions)
@@ -485,30 +486,21 @@ namespace BlockLimiter
                     });
                 });
             }
-
         }
-
 
         */
         //The methods below are method used by other plugins to check limits from Blocklimiter
         #region External Access
-        
+
         public static bool CheckLimits_future(MyObjectBuilder_CubeGrid[] grids, long id = 0)
         {
             return PluginApi.Limits.CheckLimits(grids, id);
-
         }
 
         public static bool CanAdd(List<MySlimBlock> blocks, long id, out List<MySlimBlock> nonAllowedBlocks)
         {
-
             return PluginApi.Limits.CanAdd(blocks, id, out nonAllowedBlocks);
         }
-        
         #endregion
-
-        
     }
-
-
-    }
+}

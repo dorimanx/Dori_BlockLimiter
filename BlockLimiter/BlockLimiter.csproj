@@ -35,45 +35,81 @@
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Dori-Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Dori-Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Dori-Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Dori-Debug\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\..\GameBinaries\netstandard.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\netstandard.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\TorchBinaries\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(SolutionDir)\TorchBinaries\Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="NLog">
-      <HintPath>..\..\GameBinaries\NLog.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\NLog.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="Sandbox.Common">
-      <HintPath>..\..\GameBinaries\Sandbox.Common.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\Sandbox.Common.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Sandbox.Game">
-      <HintPath>..\..\GameBinaries\Sandbox.Game.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\Sandbox.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Sandbox.Graphics">
-      <HintPath>..\..\GameBinaries\Sandbox.Graphics.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\Sandbox.Graphics.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.Game">
-      <HintPath>..\..\GameBinaries\SpaceEngineers.Game.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\SpaceEngineers.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.ObjectBuilders">
-      <HintPath>..\..\GameBinaries\SpaceEngineers.ObjectBuilders.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\SpaceEngineers.ObjectBuilders.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SpaceEngineers.ObjectBuilders.XmlSerializers">
-      <HintPath>..\..\GameBinaries\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\SpaceEngineers.ObjectBuilders.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -87,55 +123,55 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Torch">
-      <HintPath>..\..\TorchBinaries\Torch.dll</HintPath>
+      <HintPath>$(SolutionDir)\TorchBinaries\Torch.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Torch.API">
-      <HintPath>..\..\TorchBinaries\Torch.API.dll</HintPath>
+      <HintPath>$(SolutionDir)\TorchBinaries\Torch.API.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Torch.Server">
-      <HintPath>..\..\TorchBinaries\Torch.Server.exe</HintPath>
+      <HintPath>$(SolutionDir)\TorchBinaries\Torch.Server.exe</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage">
-      <HintPath>..\..\GameBinaries\VRage.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Audio">
-      <HintPath>..\..\GameBinaries\VRage.Audio.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Audio.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Game">
-      <HintPath>..\..\GameBinaries\VRage.Game.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Game.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Game.XmlSerializers">
-      <HintPath>..\..\GameBinaries\VRage.Game.XmlSerializers.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Game.XmlSerializers.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Input">
-      <HintPath>..\..\GameBinaries\VRage.Input.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Input.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Library">
-      <HintPath>..\..\GameBinaries\VRage.Library.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Library.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Math">
-      <HintPath>..\..\GameBinaries\VRage.Math.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Math.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Render">
-      <HintPath>..\..\GameBinaries\VRage.Render.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Render.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Render11">
-      <HintPath>..\..\GameBinaries\VRage.Render11.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Render11.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="VRage.Scripting">
-      <HintPath>..\..\GameBinaries\VRage.Scripting.dll</HintPath>
+      <HintPath>$(SolutionDir)\GameBinaries\VRage.Scripting.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="WindowsBase" />
@@ -174,15 +210,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\filter.targets" />
-    <ItemGroup>
-        <Content Include="$(ProjectDir)\manifest.xml" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="..\.idea\.idea.BlockLimiter\.idea\.gitignore">
-          <Link>.gitignore</Link>
-        </Content>
-    </ItemGroup>
-    <Target Name="Zip" BeforeTargets="AfterBuild">
-        <MakeDir Directories="$(SolutionDir)\Build\" />
-        <ZipDirectory SourceDirectory="$(OutputPath)" DestinationFile="$(SolutionDir)\Build\$(MSBuildProjectName).zip" Overwrite="true" />
-    </Target>
+  <Import Project="filter.targets" />
+  <ItemGroup>
+    <Content Include="$(ProjectDir)\manifest.xml" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include=".gitignore" />
+  </ItemGroup>
+  <Target Name="Zip" BeforeTargets="AfterBuild">
+    <MakeDir Directories="$(SolutionDir)\Build\" />
+    <ZipDirectory SourceDirectory="$(OutputPath)" DestinationFile="$(SolutionDir)\Build\$(MSBuildProjectName).zip" Overwrite="true" />
+  </Target>
 </Project>

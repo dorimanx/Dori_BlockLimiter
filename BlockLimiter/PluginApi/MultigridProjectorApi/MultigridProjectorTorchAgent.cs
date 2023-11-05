@@ -41,7 +41,7 @@ namespace BlockLimiter.PluginApi.MultigridProjectorApi
                 return;
 
             var apiType = Api.GetType();
-            Version = (string) apiType.GetProperty("Version")?.GetValue(Api);
+            Version = (string)apiType.GetProperty("Version")?.GetValue(Api);
             if (Version == null || !Version.StartsWith(CompatibleMajorVersion))
                 return;
 
@@ -59,42 +59,42 @@ namespace BlockLimiter.PluginApi.MultigridProjectorApi
 
         public int GetSubgridCount(long projectorId)
         {
-            return (int) (_miGetSubgridCount?.Invoke(Api, new object[] {projectorId}) ?? 0);
+            return (int)(_miGetSubgridCount?.Invoke(Api, new object[] { projectorId }) ?? 0);
         }
 
         public List<MyObjectBuilder_CubeGrid> GetOriginalGridBuilders(long projectorId)
         {
-            return (List<MyObjectBuilder_CubeGrid>) _miGetOriginalGridBuilders?.Invoke(Api, new object[] {projectorId});
+            return (List<MyObjectBuilder_CubeGrid>)_miGetOriginalGridBuilders?.Invoke(Api, new object[] { projectorId });
         }
 
         public IMyCubeGrid GetPreviewGrid(long projectorId, int subgridIndex)
         {
-            return (IMyCubeGrid) _miGetPreviewGrid?.Invoke(Api, new object[] {projectorId, subgridIndex});
+            return (IMyCubeGrid)_miGetPreviewGrid?.Invoke(Api, new object[] { projectorId, subgridIndex });
         }
 
         public IMyCubeGrid GetBuiltGrid(long projectorId, int subgridIndex)
         {
-            return (IMyCubeGrid) _miGetBuiltGrid?.Invoke(Api, new object[] {projectorId, subgridIndex});
+            return (IMyCubeGrid)_miGetBuiltGrid?.Invoke(Api, new object[] { projectorId, subgridIndex });
         }
 
         public BlockState GetBlockState(long projectorId, int subgridIndex, Vector3I position)
         {
-            return (BlockState) (_miGetBlockState?.Invoke(Api, new object[] {projectorId, subgridIndex, position}) ?? BlockState.Unknown);
+            return (BlockState)(_miGetBlockState?.Invoke(Api, new object[] { projectorId, subgridIndex, position }) ?? BlockState.Unknown);
         }
 
         public bool GetBlockStates(Dictionary<Vector3I, BlockState> blockStates, long projectorId, int subgridIndex, BoundingBoxI box, int mask)
         {
-            return (bool) (_miGetBlockStates?.Invoke(Api, new object[] {blockStates, projectorId, subgridIndex, box, mask}) ?? false);
+            return (bool)(_miGetBlockStates?.Invoke(Api, new object[] { blockStates, projectorId, subgridIndex, box, mask }) ?? false);
         }
 
         public Dictionary<Vector3I, BlockLocation> GetBaseConnections(long projectorId, int subgridIndex)
         {
-            return (Dictionary<Vector3I, BlockLocation>) _miGetBaseConnections?.Invoke(Api, new object[] {projectorId, subgridIndex});
+            return (Dictionary<Vector3I, BlockLocation>)_miGetBaseConnections?.Invoke(Api, new object[] { projectorId, subgridIndex });
         }
 
         public Dictionary<Vector3I, BlockLocation> GetTopConnections(long projectorId, int subgridIndex)
         {
-            return (Dictionary<Vector3I, BlockLocation>) _miGetTopConnections?.Invoke(Api, new object[] {projectorId, subgridIndex});
+            return (Dictionary<Vector3I, BlockLocation>)_miGetTopConnections?.Invoke(Api, new object[] { projectorId, subgridIndex });
         }
     }
 }

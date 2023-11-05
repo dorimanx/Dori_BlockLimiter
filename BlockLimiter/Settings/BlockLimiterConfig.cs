@@ -13,22 +13,19 @@ namespace BlockLimiter.Settings
 {
     [Serializable]
     public class BlockLimiterConfig : ViewModel
-
     {
         private bool _enable;
         private static BlockLimiterConfig _instance;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private XmlAttributeOverrides _overrides;
-        
+
         [XmlIgnore]
         public HashSet<LimitItem> AllLimits = new HashSet<LimitItem>();
         public BlockLimiterConfig()
         {
             _limitItems = new MtObservableCollection<LimitItem>();
             _limitItems.CollectionChanged += ItemsCollectionChanged;
-
         }
-
 
         public static BlockLimiterConfig Instance => _instance ?? (_instance = new BlockLimiterConfig());
 
@@ -43,7 +40,6 @@ namespace BlockLimiter.Settings
                 Save();
             }
         }
-
 
         private bool _loading;
         private bool _vanillaLimits;
@@ -81,7 +77,7 @@ namespace BlockLimiter.Settings
             get => _maxBlocksSmallGrid;
             set
             {
-                _maxBlocksSmallGrid = value; 
+                _maxBlocksSmallGrid = value;
                 Changed();
             }
         }
@@ -92,7 +88,7 @@ namespace BlockLimiter.Settings
             get => _maxBlocksLargeGrid;
             set
             {
-                _maxBlocksLargeGrid = value; 
+                _maxBlocksLargeGrid = value;
                 Changed();
             }
         }
@@ -103,7 +99,7 @@ namespace BlockLimiter.Settings
             get => _maxBlockSizeShips;
             set
             {
-                _maxBlockSizeShips = value; 
+                _maxBlockSizeShips = value;
                 Changed();
             }
         }
@@ -114,7 +110,7 @@ namespace BlockLimiter.Settings
             get => _maxBlockSizeStations;
             set
             {
-                _maxBlockSizeStations = value; 
+                _maxBlockSizeStations = value;
                 Changed();
             }
         }
@@ -125,7 +121,7 @@ namespace BlockLimiter.Settings
             get => _maxBlockSizeProjections;
             set
             {
-                _maxBlockSizeProjections = value; 
+                _maxBlockSizeProjections = value;
                 Changed();
             }
         }
@@ -217,7 +213,7 @@ namespace BlockLimiter.Settings
             get => _serverName;
             set
             {
-                _serverName = string.IsNullOrEmpty(value) ? BlockLimiter.ChatName : value; 
+                _serverName = string.IsNullOrEmpty(value) ? BlockLimiter.ChatName : value;
                 Changed();
             }
         }
@@ -240,7 +236,7 @@ namespace BlockLimiter.Settings
             get => _denyMessage;
             set
             {
-                _denyMessage = value; 
+                _denyMessage = value;
                 Changed();
             }
         }
@@ -251,7 +247,7 @@ namespace BlockLimiter.Settings
             get => _projectionDenyMessage;
             set
             {
-                _projectionDenyMessage = value; 
+                _projectionDenyMessage = value;
                 Changed();
             }
         }
@@ -269,29 +265,29 @@ namespace BlockLimiter.Settings
         #endregion
 
         #region Blocking Functions
-        [Display(Order = 1, GroupName = "Blocking Options", Name =  "Enable Grid Spawn Blocking", Description = "Will block entire grid from spawning or remove potential violation blocks before spawn")]
+        [Display(Order = 1, GroupName = "Blocking Options", Name = "Enable Grid Spawn Blocking", Description = "Will block entire grid from spawning or remove potential violation blocks before spawn")]
         public bool EnableGridSpawnBlocking
         {
             get => _gridSpawnBlocking;
             set
             {
-                _gridSpawnBlocking = value; 
+                _gridSpawnBlocking = value;
                 Changed();
             }
         }
 
-        [Display(Order = 2, GroupName = "Blocking Options", Name =  "Enable Grid Convert Blocking", Description = "Will block grid conversion if grid will violate limits upon conversion")]
+        [Display(Order = 2, GroupName = "Blocking Options", Name = "Enable Grid Convert Blocking", Description = "Will block grid conversion if grid will violate limits upon conversion")]
         public bool EnableConvertBlock
         {
             get => _gridConvertBlocking;
             set
             {
-                _gridConvertBlocking = value; 
+                _gridConvertBlocking = value;
                 Changed();
             }
         }
-        
-        [Display(Order = 3, GroupName = "Blocking Options", Name =  "Enable Ownership Transfer Blocking", Description = "Will block ownership if player exceeds limit of block being transferred to them")]
+
+        [Display(Order = 3, GroupName = "Blocking Options", Name = "Enable Ownership Transfer Blocking", Description = "Will block ownership if player exceeds limit of block being transferred to them")]
         public bool BlockOwnershipTransfer
         {
             get => _blockOwnershipTransfer;
@@ -302,7 +298,7 @@ namespace BlockLimiter.Settings
             }
         }
 
-                
+
         [Display(Order = 4, GroupName = "Blocking Options", Name = "Merger Blocking", Description = "Enables checking merge attempts with limits")]
         public bool MergerBlocking
         {
@@ -314,7 +310,7 @@ namespace BlockLimiter.Settings
             }
         }
 
-        
+
 
         #endregion
 
@@ -326,18 +322,18 @@ namespace BlockLimiter.Settings
             get => _annoy;
             set
             {
-                _annoy = value; 
+                _annoy = value;
                 Changed();
             }
         }
 
-        [Display(Order = 5,Name = "Punishment Interval (s)", GroupName = "Punishment", Description = "How often the punishment is triggered in seconds.")]
+        [Display(Order = 5, Name = "Punishment Interval (s)", GroupName = "Punishment", Description = "How often the punishment is triggered in seconds.")]
         public int PunishInterval
         {
             get => _punishInterval;
             set
             {
-                _punishInterval = Math.Max(30,value); 
+                _punishInterval = Math.Max(30, value);
                 Changed();
             }
         }
@@ -348,18 +344,18 @@ namespace BlockLimiter.Settings
             get => _annoyMsg;
             set
             {
-                _annoyMsg = value; 
+                _annoyMsg = value;
                 Changed();
             }
         }
 
-        [Display(Order = 3,Name = "Annoy Message Interval (s)", GroupName = "Punishment", Description = "How often annoyance message is triggered in seconds")]
+        [Display(Order = 3, Name = "Annoy Message Interval (s)", GroupName = "Punishment", Description = "How often annoyance message is triggered in seconds")]
         public int AnnoyInterval
         {
             get => _annoyInterval;
             set
             {
-                _annoyInterval = Math.Max(10,value); 
+                _annoyInterval = Math.Max(10, value);
                 Changed();
             }
         }
@@ -370,7 +366,7 @@ namespace BlockLimiter.Settings
             get => _annoyDuration;
             set
             {
-                _annoyDuration = value; 
+                _annoyDuration = value;
                 Changed();
             }
         }
@@ -382,7 +378,7 @@ namespace BlockLimiter.Settings
         private void Changed(bool updated = true)
         {
             OnPropertyChanged();
-            if (updated)Instance.Save(); 
+            if (updated) Instance.Save();
         }
 
         /// <summary>
@@ -403,9 +399,9 @@ namespace BlockLimiter.Settings
                         {
                             var x = _overrides != null ? new XmlSerializer(typeof(BlockLimiterConfig), _overrides) : new XmlSerializer(typeof(BlockLimiterConfig));
                             var settings = (BlockLimiterConfig)x.Deserialize(reader);
-                            
+
                             reader.Close();
-                            if(settings != null)_instance = settings;
+                            if (settings != null) _instance = settings;
                         }
                     }
                     else
@@ -435,7 +431,7 @@ namespace BlockLimiter.Settings
                 _loading = false;
             }
         }
-        
+
         /// <summary>
         ///     Saves our settings
         /// </summary>
@@ -473,7 +469,7 @@ namespace BlockLimiter.Settings
             }
         }
 
-#endregion
+        #endregion
 
         #region Events
 
@@ -487,7 +483,7 @@ namespace BlockLimiter.Settings
         {
             OnPropertyChanged();
             AllLimits = Utilities.UpdateLimits(UseVanillaLimits);
-            Instance.Save(); 
+            Instance.Save();
         }
 
 
@@ -500,6 +496,5 @@ namespace BlockLimiter.Settings
             Soft, //plugin blocks placement
             Hard  //plugin blocks potential violation removes any excess.
         }
-
     }
 }

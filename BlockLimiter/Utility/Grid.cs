@@ -14,7 +14,6 @@ namespace BlockLimiter.Utility
 {
     public static class Grid
     {
-
         public static bool IsOwner(MyCubeGrid grid, long id)
         {
             if (grid == null || id == 0) return false;
@@ -23,7 +22,7 @@ namespace BlockLimiter.Utility
 
         public static bool IsSizeViolation(long id)
         {
-            return GridCache.TryGetGridById(id, out var grid) && IsSizeViolation(grid,false, out _);
+            return GridCache.TryGetGridById(id, out var grid) && IsSizeViolation(grid, false, out _);
         }
 
         public static bool IsSizeViolation(MyObjectBuilder_CubeGrid grid)
@@ -31,33 +30,23 @@ namespace BlockLimiter.Utility
             if (Utilities.IsExcepted(grid)) return false;
 
             if (grid == null)
-            {
                 return false;
-            }
+
             var gridSize = grid.CubeBlocks.Count;
             var gridType = grid.GridSizeEnum;
             var isStatic = grid.IsStatic;
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeShips > 0 && !isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeShips)
-            {
-                return  true;
-            }
+                return true;
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeStations > 0 && isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeStations)
-            {
-                return  true;
-            }
+                return true;
 
             if (BlockLimiterConfig.Instance.MaxBlocksLargeGrid > 0 && gridType == MyCubeSize.Large && gridSize >= BlockLimiterConfig.Instance.MaxBlocksLargeGrid)
-            {
-                return  true;
-            }
+                return true;
 
             if (BlockLimiterConfig.Instance.MaxBlocksSmallGrid > 0 && gridType == MyCubeSize.Small && gridSize >= BlockLimiterConfig.Instance.MaxBlocksSmallGrid)
-            {
-                return  true;
-            }
-            
+                return true;
 
             return false;
         }
@@ -72,33 +61,30 @@ namespace BlockLimiter.Utility
 
             var gridSize = grid.CubeBlocks.Count;
             var gridType = grid.GridSizeEnum;
-            var isStatic = converting? !grid.IsStatic:grid.IsStatic;
+            var isStatic = converting ? !grid.IsStatic : grid.IsStatic;
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeShips > 0 && !isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeShips)
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeShips);
-                return  true;
+                return true;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeStations > 0 && isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeStations)
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeStations);
-                return  true;
+                return true;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlocksLargeGrid > 0 && gridType == MyCubeSize.Large && gridSize >= BlockLimiterConfig.Instance.MaxBlocksLargeGrid)
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksLargeGrid);
-                return  true;
+                return true;
             }
             if (BlockLimiterConfig.Instance.MaxBlocksSmallGrid <= 0 || gridType != MyCubeSize.Small ||
                 gridSize < BlockLimiterConfig.Instance.MaxBlocksSmallGrid) return false;
             count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksSmallGrid);
 
-
-
-            return  true;
-
+            return true;
         }
 
         public static bool CountViolation(MyCubeBlockDefinition block, long owner)
@@ -120,11 +106,12 @@ namespace BlockLimiter.Utility
         {
             if (owner == 0) return false;
             if (Utilities.IsExcepted(owner)) return false;
-            var playerGrids = new HashSet<MyCubeGrid>();
-            GridCache.GetPlayerGrids(playerGrids,owner);
-            var smallGrids = playerGrids.Count(x => x.GridSizeEnum == MyCubeSize.Small && IsBiggestGridInGroup(x));
 
+            var playerGrids = new HashSet<MyCubeGrid>();
+            GridCache.GetPlayerGrids(playerGrids, owner);
+            var smallGrids = playerGrids.Count(x => x.GridSizeEnum == MyCubeSize.Small && IsBiggestGridInGroup(x));
             var largeGrids = playerGrids.Count(x => x.GridSizeEnum == MyCubeSize.Large && IsBiggestGridInGroup(x));
+
             if (size == MyCubeSize.Large)
             {
                 if (BlockLimiterConfig.Instance.MaxLargeGrids == 0) return false;
@@ -133,15 +120,15 @@ namespace BlockLimiter.Utility
             }
 
             if (BlockLimiterConfig.Instance.MaxSmallGrids == 0) return false;
-
             if (BlockLimiterConfig.Instance.MaxSmallGrids < 0) return true;
-            return smallGrids >= BlockLimiterConfig.Instance.MaxSmallGrids;
 
+            return smallGrids >= BlockLimiterConfig.Instance.MaxSmallGrids;
         }
 
         public static bool IsBiggestGridInGroup(MyCubeGrid grid)
         {
             if (grid == null) return true;
+
             var biggestGrid = GetBiggestGridInGroup(grid);
             if (biggestGrid == null) return false;
             return grid == biggestGrid;
@@ -150,11 +137,13 @@ namespace BlockLimiter.Utility
         private static MyCubeGrid GetBiggestGridInGroup(MyCubeGrid grid)
         {
             if (grid == null) return null;
+
             var biggestGrid = grid;
             double num = 0.0;
-            var nodes = MyCubeGridGroups.Static.Mechanical
-                .GetGroup(grid)?.Nodes;
+            var nodes = MyCubeGridGroups.Static.Mechanical.GetGroup(grid)?.Nodes;
+
             if (nodes == null) return biggestGrid;
+
             foreach (var node in nodes)
             {
                 var volume = node.NodeData.PositionComp.WorldAABB.Size.Volume;
@@ -169,10 +158,12 @@ namespace BlockLimiter.Utility
         public static List<MyCubeGrid> GetSubGrids(MyCubeGrid grid)
         {
             if (grid == null) return null;
+
             var result = new List<MyCubeGrid>();
-            var nodes = MyCubeGridGroups.Static.NoContactDamage
-                .GetGroup(grid)?.Nodes;
+            var nodes = MyCubeGridGroups.Static.NoContactDamage.GetGroup(grid)?.Nodes;
+
             if (nodes == null) return result;
+
             result.AddRange(from MyGroups<MyCubeGrid, MyGridNoDamageGroupData>.Node node in nodes where node.NodeData != grid select node.NodeData);
 
             return result;
@@ -181,8 +172,8 @@ namespace BlockLimiter.Utility
         private static IEnumerable<MySlimBlock> GetSubGridBlocks(MyCubeGrid grid)
         {
             if (grid == null) return null;
-            
-            var result = new HashSet<MySlimBlock>(GetSubGrids(grid).SelectMany(x=>x.CubeBlocks));
+
+            var result = new HashSet<MySlimBlock>(GetSubGrids(grid).SelectMany(x => x.CubeBlocks));
             return result;
         }
 
@@ -191,7 +182,7 @@ namespace BlockLimiter.Utility
             return CanMerge(grid1, grid2, out _, out _, out _);
         }
 
-        public static bool CanMerge(MyCubeGrid grid1, MyCubeGrid grid2, out List<string>blocks, out int count, out string limitName)
+        public static bool CanMerge(MyCubeGrid grid1, MyCubeGrid grid2, out List<string> blocks, out int count, out string limitName)
         {
             limitName = null;
             blocks = new List<string>();
@@ -200,14 +191,14 @@ namespace BlockLimiter.Utility
 
             if (Utilities.IsExcepted(grid1) ||
                 Utilities.IsExcepted(grid2)) return true;
-            
+
             var blocksHash = new HashSet<MySlimBlock>(grid1.CubeBlocks);
             //Adding all present blocks from grid.
             blocksHash.UnionWith(grid2.CubeBlocks);
             blocksHash.UnionWith(GetSubGridBlocks(grid1));
             blocksHash.UnionWith(GetSubGridBlocks(grid2));
             if (blocksHash.Count == 0) return true;
-            
+
             blocks.Add("All blocks - Size Violation");
             var gridSize = grid1.CubeBlocks.Count + grid2.CubeBlocks.Count;
             var gridType = grid1.GridSizeEnum;
@@ -217,7 +208,7 @@ namespace BlockLimiter.Utility
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeShips);
                 limitName = "MaxBlockSizeShips";
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeStations > 0 && isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeStations)
@@ -225,14 +216,14 @@ namespace BlockLimiter.Utility
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeStations);
                 limitName = "MaxBlockSizeStations";
 
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlocksLargeGrid > 0 && gridType == MyCubeSize.Large && gridSize >= BlockLimiterConfig.Instance.MaxBlocksLargeGrid)
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksLargeGrid);
                 limitName = "MaxBlocksLargeGrid";
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlocksSmallGrid > 0 && gridType == MyCubeSize.Small && gridSize >= BlockLimiterConfig.Instance.MaxBlocksSmallGrid)
@@ -240,14 +231,14 @@ namespace BlockLimiter.Utility
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksSmallGrid);
                 limitName = "MaxBlocksSmallGrid";
 
-                return  false;
+                return false;
             }
             blocks.Clear();
             count = 0;
             var id1 = grid1.EntityId;
             var id2 = grid2.EntityId;
-            var sugGridIds = new List<long>(GetSubGrids(grid1).Select(x=>x.EntityId));
-            sugGridIds.AddRange(GetSubGrids(grid2).Select(x=>x.EntityId));
+            var sugGridIds = new List<long>(GetSubGrids(grid1).Select(x => x.EntityId));
+            sugGridIds.AddRange(GetSubGrids(grid2).Select(x => x.EntityId));
             foreach (var limit in BlockLimiterConfig.Instance.AllLimits)
             {
                 limitName = limit.Name;
@@ -260,12 +251,10 @@ namespace BlockLimiter.Utility
                 {
                     foreach (var id in sugGridIds)
                     {
-                        if (!limit.FoundEntities.TryGetValue(id, out var sCount))continue;
+                        if (!limit.FoundEntities.TryGetValue(id, out var sCount)) continue;
                         subGridCount += sCount;
-
                     }
                 }
-                
 
                 limit.FoundEntities.TryGetValue(id1, out var id1Count);
                 limit.FoundEntities.TryGetValue(id2, out var id2Count);
@@ -273,36 +262,35 @@ namespace BlockLimiter.Utility
                 if (foundCount <= limit.Limit) continue;
 
                 count = foundCount;
-                
-                
+
                 //ToDo Optimize this. Change the FoundEntities a bit to add matching blocks from each grid.
-                var matchingBlocks = new List<MySlimBlock>(blocksHash.Where(x=> limit.IsMatch(x.BlockDefinition)));
-                
+                var matchingBlocks = new List<MySlimBlock>(blocksHash.Where(x => limit.IsMatch(x.BlockDefinition)));
+
                 //if (matchingBlocks.Count <= limit.Limit) continue;
                 //count = Math.Abs(matchingBlocks.Count - limit.Limit);
-                if (matchingBlocks.Count > 0)blocks.Add(matchingBlocks[0].BlockDefinition.ToString().Substring(16));
+                if (matchingBlocks.Count > 0) blocks.Add(matchingBlocks[0].BlockDefinition.ToString().Substring(16));
 
                 return false;
             }
-
             return true;
-
         }
-        public static bool CanMerge(MyCubeGrid grid1, List<MyObjectBuilder_CubeGrid> gridsToMerge, out List<string>blocks, out int count, out string limitName)
+
+        public static bool CanMerge(MyCubeGrid grid1, List<MyObjectBuilder_CubeGrid> gridsToMerge, out List<string> blocks, out int count, out string limitName)
         {
             limitName = null;
             blocks = new List<string>();
             count = 0;
+
             if (grid1 == null || gridsToMerge.Count == 0) return true;
 
             if (Utilities.IsExcepted(grid1)) return true;
-            
+
             var grid1Blocks = new HashSet<MySlimBlock>(grid1.CubeBlocks);
             //Adding all present blocks from grid.
             grid1Blocks.UnionWith(GetSubGridBlocks(grid1));
             var blocksToMerge = new List<MyObjectBuilder_CubeBlock>(gridsToMerge.SelectMany(x => x.CubeBlocks));
             if (grid1Blocks.Count + blocksToMerge.Count == 0) return true;
-            
+
             blocks.Add("All blocks - Size Violation");
             var gridSize = grid1Blocks.Count + blocksToMerge.Count;
             var gridType = grid1.GridSizeEnum;
@@ -312,7 +300,7 @@ namespace BlockLimiter.Utility
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeShips);
                 limitName = "MaxBlockSizeShips";
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlockSizeStations > 0 && isStatic && gridSize >= BlockLimiterConfig.Instance.MaxBlockSizeStations)
@@ -320,14 +308,14 @@ namespace BlockLimiter.Utility
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlockSizeStations);
                 limitName = "MaxBlockSizeStations";
 
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlocksLargeGrid > 0 && gridType == MyCubeSize.Large && gridSize >= BlockLimiterConfig.Instance.MaxBlocksLargeGrid)
             {
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksLargeGrid);
                 limitName = "MaxBlocksLargeGrid";
-                return  false;
+                return false;
             }
 
             if (BlockLimiterConfig.Instance.MaxBlocksSmallGrid > 0 && gridType == MyCubeSize.Small && gridSize >= BlockLimiterConfig.Instance.MaxBlocksSmallGrid)
@@ -335,22 +323,24 @@ namespace BlockLimiter.Utility
                 count = Math.Abs(gridSize - BlockLimiterConfig.Instance.MaxBlocksSmallGrid);
                 limitName = "MaxBlocksSmallGrid";
 
-                return  false;
+                return false;
             }
+
             blocks.Clear();
             count = 0;
 
             var grid1PlusSubGrids = new List<long> { grid1.EntityId };
-            grid1PlusSubGrids.AddRange(GetSubGrids(grid1).Select(x=>x.EntityId));
+            grid1PlusSubGrids.AddRange(GetSubGrids(grid1).Select(x => x.EntityId));
+
             foreach (var limit in BlockLimiterConfig.Instance.AllLimits)
             {
                 limitName = limit.Name;
                 if (!limit.LimitGrids) continue;
 
-                if (limit.IsExcepted(grid1)  || !limit.IsGridType(grid1)) continue;
+                if (limit.IsExcepted(grid1) || !limit.IsGridType(grid1)) continue;
 
-                var currentCount = limit.FoundEntities.Where(x => grid1PlusSubGrids.Contains(x.Key)).Sum(x=>x.Value);
-                var matchingBlocksToMatch = new List<MyObjectBuilder_CubeBlock>(blocksToMerge.Where(x=> limit.IsMatch(Utilities.GetDefinition(x))));
+                var currentCount = limit.FoundEntities.Where(x => grid1PlusSubGrids.Contains(x.Key)).Sum(x => x.Value);
+                var matchingBlocksToMatch = new List<MyObjectBuilder_CubeBlock>(blocksToMerge.Where(x => limit.IsMatch(Utilities.GetDefinition(x))));
                 if (matchingBlocksToMatch.Count == 0) continue;
 
                 var newTotal = currentCount + matchingBlocksToMatch.Count;
@@ -360,16 +350,14 @@ namespace BlockLimiter.Utility
 
                 return false;
             }
-
             return true;
-
         }
 
-        public static bool AllowConversion(MyCubeGrid grid, out List<string> blocks, out int count, out string limitName )
+        public static bool AllowConversion(MyCubeGrid grid, out List<string> blocks, out int count, out string limitName)
         {
             limitName = null;
-            blocks = new List<string> {"All blocks - Size Violation"};
-            if (IsSizeViolation(grid,true, out count)) return false;
+            blocks = new List<string> { "All blocks - Size Violation" };
+            if (IsSizeViolation(grid, true, out count)) return false;
 
             foreach (var limit in BlockLimiterConfig.Instance.AllLimits)
             {
@@ -387,30 +375,24 @@ namespace BlockLimiter.Utility
                     case LimitItem.GridType.LargeGridsOnly when !grid.IsStatic:
                         continue;
                 }
-                
 
                 var matchingBlocks = new List<MySlimBlock>(grid.CubeBlocks.Where(x => limit.IsMatch(x.BlockDefinition)));
-
                 if (matchingBlocks.Count <= limit.Limit)
-                {
                     continue;
-                }
 
                 count = Math.Abs(matchingBlocks.Count - limit.Limit);
                 return false;
-
             }
             limitName = null;
             return true;
         }
-        
+
         public static bool CanSpawn(MyObjectBuilder_CubeGrid grid, long playerId)
         {
             if (Utilities.IsExcepted(playerId)) return true;
 
             if (grid == null || IsSizeViolation(grid)) return false;
 
-            
             return playerId == 0 || Block.CanAdd(grid.CubeBlocks, playerId, out _);
         }
 
@@ -420,6 +402,7 @@ namespace BlockLimiter.Utility
             string limitName = null;
             var removalCount = 0;
             var removedList = new List<string>();
+
             foreach (var grid in grids)
             {
                 foreach (var limit in BlockLimiterConfig.Instance.AllLimits)
@@ -443,17 +426,9 @@ namespace BlockLimiter.Utility
                         removedList.Add(blockDef);
                         limitName = limit.Name;
                     }
-
                 }
-                
             }
-
-
             return removedList.Count > 0;
-
-
         }
-        
-
     }
 }

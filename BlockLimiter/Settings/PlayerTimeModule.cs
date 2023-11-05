@@ -14,7 +14,7 @@ namespace BlockLimiter.Settings
 
         public static List<PlayerTimeData> PlayerTimes = new List<PlayerTimeData>();
 
-        public class PlayerTimeData 
+        public class PlayerTimeData
         {
             [JsonProperty(Order = 1)]
             public string Player { get; set; }
@@ -24,10 +24,9 @@ namespace BlockLimiter.Settings
             public DateTime FirstLogTime { get; set; }
         }
 
-
         private static void SaveTimeData()
         {
-            File.WriteAllText(BlockLimiter.Instance.timeDataPath,JsonConvert.SerializeObject(PlayerTimes, Formatting.Indented));
+            File.WriteAllText(BlockLimiter.Instance.timeDataPath, JsonConvert.SerializeObject(PlayerTimes, Formatting.Indented));
         }
 
         public static void LogTime(Torch.API.IPlayer player)
@@ -50,7 +49,7 @@ namespace BlockLimiter.Settings
             data.Player = player.Name;
             var lastLogout = MySession.Static.Players.TryGetIdentity(Utilities.GetPlayerIdFromSteamId(steamId))?.LastLoginTime;
             if (lastLogout != null && DateTime.Now > lastLogout)
-                data.FirstLogTime = (DateTime) lastLogout;
+                data.FirstLogTime = (DateTime)lastLogout;
             else
             {
                 data.FirstLogTime = DateTime.Now;
@@ -69,7 +68,6 @@ namespace BlockLimiter.Settings
                 time = data.FirstLogTime;
                 break;
             }
-
             return time;
         }
     }

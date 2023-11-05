@@ -8,7 +8,6 @@ namespace BlockLimiter.ProcessHandlers
     /// </summary>
     public abstract class ProcessHandlerBase
     {
-
         protected DateTime m_lastUpdate;
 
         /// <summary>
@@ -53,6 +52,5 @@ namespace BlockLimiter.ProcessHandlers
         {
             m_lastUpdate = DateTime.Now;
         }
-
     }
 }

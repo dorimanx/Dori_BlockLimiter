@@ -12,32 +12,27 @@ using VRage.Network;
 using Sandbox.Definitions;
 using Sandbox.Game.Entities.Blocks;
 using Sandbox.Game.Entities.Cube;
-using SpaceEngineers.Game.Entities.Blocks;
-using Torch.API.Managers;
-using Torch.Managers.ChatManager;
 using VRageMath;
-
 
 namespace BlockLimiter.Patch
 {
     [PatchShim]
     public static class BuildBlockPatch
     {
-     
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
+        private static int BuildDenyTick = 0;
 
         public static void Patch(PatchContext ctx)
         {
-            
             try
             {
                 var t = typeof(MyCubeGrid);
                 var aMethod = t.GetMethod("BuildBlocksRequest", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                ctx.GetPattern(aMethod).Prefixes.Add(typeof(BuildBlockPatch).GetMethod(nameof(BuildBlocksRequest),BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
+                ctx.GetPattern(aMethod).Prefixes.Add(typeof(BuildBlockPatch).GetMethod(nameof(BuildBlocksRequest), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
                 var bMethod = t.GetMethod("BuildBlocksAreaRequest", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                ctx.GetPattern(bMethod).Prefixes.Add(typeof(BuildBlockPatch).GetMethod(nameof(BuildBlocksArea),BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
-            
+                ctx.GetPattern(bMethod).Prefixes.Add(typeof(BuildBlockPatch).GetMethod(nameof(BuildBlocksArea), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
+
                 ctx.GetPattern(typeof(MyProjectorBase).GetMethod("BuildInternal", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Instance))
                     .Prefixes.Add(typeof(BuildBlockPatch).GetMethod(nameof(Build),
                         BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static));
@@ -46,10 +41,7 @@ namespace BlockLimiter.Patch
             {
                 Log.Error(e.StackTrace, "Patching Failed");
             }
-
-            
         }
-     
 
         /// <summary>
         /// Checks blocks being built in creative with multiblock placement.
@@ -64,8 +56,7 @@ namespace BlockLimiter.Patch
             var def = MyDefinitionManager.Static.GetCubeBlockDefinition(area.DefinitionId);
             var grid = __instance;
 
-            int blocksToBuild = (int) area.BuildAreaSize.X * (int) area.BuildAreaSize.Y * (int) area.BuildAreaSize.Z;
-
+            int blocksToBuild = (int)area.BuildAreaSize.X * (int)area.BuildAreaSize.Y * (int)area.BuildAreaSize.Z;
 
             if (grid == null)
             {
@@ -79,14 +70,12 @@ namespace BlockLimiter.Patch
             if (Block.IsWithinLimits(def, playerId, grid.EntityId, blocksToBuild, out var limitName)) return true;
 
             if (remoteUserId == 0 || !MySession.Static.Players.IsPlayerOnline(playerId)) return false;
-            
+
             BlockLimiter.Instance.Log.Info($"Blocked {Utilities.GetPlayerNameFromSteamId(remoteUserId)} from placing {def.ToString().Substring(16)} due to limits");
 
-            Utilities.TrySendDenyMessage(new List<string>{def.ToString().Substring(16)}, limitName, remoteUserId);
+            Utilities.TrySendDenyMessage(new List<string> { def.ToString().Substring(16) }, limitName, remoteUserId);
 
             return false;
-
-
         }
 
         /// <summary>
@@ -97,7 +86,6 @@ namespace BlockLimiter.Patch
         /// <returns></returns>
         private static bool BuildBlocksRequest(MyCubeGrid __instance, HashSet<MyCubeGrid.MyBlockLocation> locations)
         {
-            
             if (!BlockLimiterConfig.Instance.EnableLimits) return true;
 
             var grid = __instance;
@@ -107,23 +95,19 @@ namespace BlockLimiter.Patch
                 return true;
             }
 
-
             var def = MyDefinitionManager.Static.GetCubeBlockDefinition(locations.FirstOrDefault().BlockDefinition);
-
             if (def == null) return true;
-            
-           
+
             var remoteUserId = MyEventContext.Current.Sender.Value;
             var playerId = Utilities.GetPlayerIdFromSteamId(remoteUserId);
 
-            if (Block.IsWithinLimits(def, playerId, grid.EntityId,locations.Count, out var limitName)) return true;
+            if (Block.IsWithinLimits(def, playerId, grid.EntityId, locations.Count, out var limitName)) return true;
 
             if (remoteUserId == 0 || !MySession.Static.Players.IsPlayerOnline(playerId)) return false;
 
             BlockLimiter.Instance.Log.Info($"Blocked {Utilities.GetPlayerNameFromSteamId(remoteUserId)} from placing {def.ToString().Substring(16)} due to limits");
-            Utilities.TrySendDenyMessage(new List<string>{def.ToString().Substring(16)}, limitName, remoteUserId);
+            Utilities.TrySendDenyMessage(new List<string> { def.ToString().Substring(16) }, limitName, remoteUserId);
             return false;
-
         }
 
 
@@ -148,7 +132,6 @@ namespace BlockLimiter.Patch
 
             long projectorId = projector.EntityId;
             int subgridIndex = (int)builtBy;
-
             MyCubeGrid builtGrid = (MyCubeGrid)BlockLimiter.Instance.MultigridProjectorApi.GetBuiltGrid(projectorId, subgridIndex) ?? __instance.CubeGrid;
             if (builtGrid == null) return false;
 
@@ -164,21 +147,22 @@ namespace BlockLimiter.Patch
             if (Block.IsWithinLimits(blockDefinition, owner, builtGrid.EntityId, 1, out var limitName) &&
                 Block.IsWithinLimits(blockDefinition, builder, builtGrid.EntityId, 1, out limitName)) return true;
 
-            if (remoteUserId == 0) return false;
-            var grid = projector.CubeGrid;
-            
-            BlockLimiter.Instance.Log.Info($"Blocked welding of {blockDefinition.ToString().Substring(16)} on {grid.DisplayName} ownedby {Utilities.GetPlayerNameFromId(grid.BigOwners[0])}");
-           
-            var playerId = Utilities.GetPlayerIdFromSteamId(remoteUserId);
+            if (BuildDenyTick >= 20)
+            {
+                BuildDenyTick = 0;
 
-            if (!MySession.Static.Players.IsPlayerOnline(playerId)) return false;
+                if (remoteUserId == 0) return false;
+                var grid = projector.CubeGrid;
 
-            Utilities.TrySendDenyMessage(new List<string>{blockDefinition.ToString().Substring(16)},limitName,remoteUserId);
+                BlockLimiter.Instance.Log.Info($"Blocked welding of {blockDefinition.ToString().Substring(16)} on {grid.DisplayName} ownedby {Utilities.GetPlayerNameFromId(grid.BigOwners[0])}");
+
+                var playerId = Utilities.GetPlayerIdFromSteamId(remoteUserId);
+
+                if (!MySession.Static.Players.IsPlayerOnline(playerId)) return false;
+
+                Utilities.TrySendDenyMessage(new List<string> { blockDefinition.ToString().Substring(16) }, limitName, remoteUserId);
+            }
             return false;
-
-
         }
-            
-
     }
 }

@@ -32,57 +32,48 @@ namespace BlockLimiter.Patch
             {
                 var t = typeof(MyMechanicalConnectionBlockBase);
                 var a = typeof(MechanicalConnection).GetMethod(nameof(OnAttach), BindingFlags.NonPublic | BindingFlags.Static);
+
                 foreach (var met in t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                 {
-
                     if (met.Name == "TryAttach")
-                    {
                         ctx.GetPattern(met).Prefixes.Add(a);
-                    }
                 }
             }
             catch (Exception e)
             {
                 Log.Error(e.StackTrace, "Patching Failed");
             }
-
-          
-
         }
 
         private static bool OnAttach(MyMechanicalConnectionBlockBase __instance, MyAttachableTopBlockBase top)
         {
             if (!BlockLimiterConfig.Instance.MergerBlocking || !BlockLimiterConfig.Instance.EnableLimits || !MySession.Static.Ready)
-            {
                 return true;
-            }
+
             var topGrid = top.CubeGrid;
             var baseGrid = __instance.CubeGrid;
 
             var remoteUserId = MyEventContext.Current.Sender.Value;
             DateTime topDateTime = default;
+
             if (_lastChecked.TryGetValue(__instance.EntityId, out var inDateTime) || _lastChecked.TryGetValue(top.EntityId, out topDateTime))
             {
-                if ( Math.Abs((DateTime.Now - inDateTime).Seconds) > 10)
-                {
+                if (Math.Abs((DateTime.Now - inDateTime).Seconds) > 10)
                     _lastChecked.Remove(__instance.EntityId);
-                }
+
                 if (Math.Abs((DateTime.Now - topDateTime).Seconds) > 10)
-                {
                     _lastChecked.Remove(top.EntityId);
-                }
 
                 if (remoteUserId <= 0) return false;
+
                 Utilities.SendFailSound(remoteUserId);
                 Utilities.ValidationFailed(remoteUserId);
                 return false;
             }
+
             var result = Grid.CanMerge(topGrid, baseGrid, out var blocks, out var count, out var limitName);
             if (result)
-            {
-
                 return true;
-            }
 
             _lastChecked[__instance.EntityId] = DateTime.Now;
             _lastChecked[top.EntityId] = DateTime.Now;
@@ -91,9 +82,8 @@ namespace BlockLimiter.Patch
             topGrid.RemoveBlock(top.SlimBlock);
             baseGrid.RemoveBlock(__instance.SlimBlock);
 
-            Utilities.TrySendDenyMessage(blocks,limitName,remoteUserId,count);
+            Utilities.TrySendDenyMessage(blocks, limitName, remoteUserId, count);
             return false;
         }
-
     }
 }
